@@ -85,10 +85,10 @@ fn main() {
     feature = "bundled-sqlcipher"
 ))]
 mod build_bundled {
+    use glob::glob;
     use std::env;
     use std::ffi::OsString;
     use std::path::{Path, PathBuf};
-    use glob::glob;
 
     use super::{is_compiler, win_target};
 
@@ -217,7 +217,10 @@ mod build_bundled {
                     os => os,
                 };
                 let ndk_home = env::var("ANDROID_NDK_HOME").expect("ANDROID_NDK_HOME not set");
-                let link_search_glob = format!("{}/toolchains/llvm/prebuilt/{}-x86_64/lib64/clang/**/lib/linux", ndk_home, os);
+                let link_search_glob = format!(
+                    "{}/toolchains/llvm/prebuilt/{}-x86_64/lib64/clang/**/lib/linux",
+                    ndk_home, os
+                );
                 // there will be different version so just pick first, there likely shouldn't be multiple anyways
                 let link_search_path = glob(&link_search_glob)
                     .expect("failed to read link_search_glob")
