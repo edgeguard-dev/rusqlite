@@ -211,10 +211,11 @@ mod build_bundled {
             // builtins for android-x86_64
             let target = env::var("TARGET").unwrap();
             if target == "x86_64-linux-android" {
-                // this might bork if building on os other than linux/macos, but I will leave that to those users to fix :)
+                // this should work on linux, macos, and windows... don't think we would every build on others, bsd flavors might still work as linux... but not sure
                 let os = match env::consts::OS {
                     "macos" => "darwin",
-                    os => os,
+                    "windows" => "windows",
+                    _ => "linux",
                 };
                 let ndk_home = env::var("ANDROID_NDK_HOME").expect("ANDROID_NDK_HOME not set");
                 let link_search_glob = format!(
