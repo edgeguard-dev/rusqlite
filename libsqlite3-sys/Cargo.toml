@@ -48,3 +48,4 @@ bindgen = { version = "0.66", optional = true, default-features = false, feature
 pkg-config = { version = "0.3.19", optional = true }
 cc = { version = "1.0", optional = true }
 vcpkg = { version = "0.2", optional = true }
+glob = "0.3.1"

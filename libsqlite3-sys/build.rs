@@ -85,6 +85,7 @@ fn main() {
     feature = "bundled-sqlcipher"
 ))]
 mod build_bundled {
+    use glob::glob;
     use std::env;
     use std::ffi::OsString;
     use std::path::{Path, PathBuf};
@@ -206,6 +207,30 @@ mod build_bundled {
         // https://android.googlesource.com/platform/external/sqlite/+/2c8c9ae3b7e6f340a19a0001c2a889a211c9d8b2/dist/Android.mk
         if super::android_target() {
             cfg.flag("-DSQLITE_TEMP_STORE=3");
+
+            // builtins for android-x86_64
+            let target = env::var("TARGET").unwrap();
+            if target == "x86_64-linux-android" {
+                // this should work on linux, macos, and windows... don't think we would every build on others, bsd flavors might still work as linux... but not sure
+                let os = match env::consts::OS {
+                    "macos" => "darwin",
+                    "windows" => "windows",
+                    _ => "linux",
+                };
+                let ndk_home = env::var("ANDROID_NDK_HOME").expect("ANDROID_NDK_HOME not set");
+                let link_search_glob = format!(
+                    "{}/toolchains/llvm/prebuilt/{}-x86_64/lib64/clang/**/lib/linux",
+                    ndk_home, os
+                );
+                // there will be different version so just pick first, there likely shouldn't be multiple anyways
+                let link_search_path = glob(&link_search_glob)
+                    .expect("failed to read link_search_glob")
+                    .next()
+                    .expect("failed to find link_search_path")
+                    .expect("link_search_path glob result failed");
+                println!("cargo:rustc-link-lib=static=clang_rt.builtins-x86_64-android");
+                println!("cargo:rustc-link-search={}", link_search_path.display());
+            }
         }
 
         if cfg!(feature = "with-asan") {
